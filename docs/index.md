@@ -1,3 +1,11 @@
+- [Docker DevEnv](#docker-devenv)
+- [Prerequisites](#prerequisites)
+- [Docker Desktop](#docker-desktop)
+  - [Installation](#installation)
+  - [Alternatives](#alternatives)
+- [Global Services Installation / Configuration](#global-services-installation--configuration)
+- [Per-Project Configuration](#per-project-configuration)
+
 ## Docker DevEnv
 
 This is a docker-based development environment with hopefully few opinions on
@@ -68,7 +76,7 @@ Docker Desktop is not free for everyone, so it may not be a fit for you or your
 organization. You do not need to use Docker Desktop for this. This is intended
 for use with Docker, so any Docker service will work (e.g. Lima or Colima).
 
-## Core Services Installation / Configuration
+## Global Services Installation / Configuration
 
 Follow the [Global Services Setup](globalServicesSetup.md) guide to set up
 those services that are shared across all projects.

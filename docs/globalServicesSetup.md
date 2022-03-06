@@ -1,3 +1,19 @@
+- [Global Services Setup](#global-services-setup)
+- [Service Descriptions](#service-descriptions)
+  - [CoreDNS](#coredns)
+  - [StepCA](#stepca)
+  - [Traefik](#traefik)
+  - [MailHog](#mailhog)
+- [Core Services Setup](#core-services-setup)
+  - [Set up services directories and configs](#set-up-services-directories-and-configs)
+  - [Seed Step CA](#seed-step-ca)
+  - [Start the Core Services](#start-the-core-services)
+- [DNSMasq (Optional)](#dnsmasq-optional)
+  - [Installation](#installation)
+- [Mutagen](#mutagen)
+- [Mutagen-Compose](#mutagen-compose)
+  - [Installation](#installation-1)
+
 ## Global Services Setup
 
 The global project services are a set of container that every project will
