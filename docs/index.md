@@ -1,4 +1,4 @@
-# Docker DevEnv
+## Docker DevEnv
 
 This is a docker-based development environment with hopefully few opinions on
 structure. It's meant as a quick-start for those that just want to change a few
@@ -68,94 +68,33 @@ Docker Desktop is not free for everyone, so it may not be a fit for you or your
 organization. You do not need to use Docker Desktop for this. This is intended
 for use with Docker, so any Docker service will work (e.g. Lima or Colima).
 
-## DNSMasq (Optional)
+## Core Services Installation / Configuration
 
-If you want to work offline or use a custom TLD (e.g. .lan or .devenv) this
-will allow you to route any domain to a specific IP. It will only resolve what
-it has authority to resolve and will pass along all other requests to a real
-DNS server.
+Follow the [Global Services Setup](globalServicesSetup.md) guide to set up
+those services that are shared across all projects.
 
-### Installation
 
-1. Install the DNSMasq package
-    - `brew install dnsmasq `
-    - **Windows:** ?? Isn't supported, but any other DNS Proxy where you can
-    define specific entries get routed to a particular IP would work
-      - It may be possible to use the CoreDNS Docker container for this;
-      however, that is outside the scope of this document.
-1. Add record to forward all requests for `.lan` addresses to DNSMasq
-    - `echo "address=/.lan/127.0.0.1" | sudo tee -a /usr/local/etc/dnsmasq.conf`
-1. Add custom resolver for `.lan`
-    - Create the resolver directory (if it doesn't already exist):
-    `sudo mkdir /etc/resolver`
-    - Add DNSMasq as the resolver for `.lan`:
-    `echo nameserver 127.0.0.1" | sudo tee /etc/resolver/lan`
-1. Restart MacOS Resolver
-   `sudo killall -HUP mDNSResponder;
-   sudo killall mDNSResponderHelper;
-   sudo dscacheutil -flushcache`
-1. Validate the resolver is now able to use DNSMasq:
-   `scutil --dns | rep -A3 -B1 lan`
-    - You should expect to see something like the following:
-      ```
-      resolver #8
-         domain   : lan
-         nameserver[0] : 127.0.0.1
-         flags    : Request A records, Request AAAA records
-         reach    : 0x00030002 (Reachable,Local Address,Directly Reachable Address)
+## Per-Project Configuration
 
-## Mutagen
-
-Install mutagen via Homebrew like any other package: `brew install mutagen`
-
-Once installed you can use the sample file as a guide on how to configure this
-project.
-
-## Mutagen-Compose
-
-Mutagen-Compose is a docker-compose replacement that will start a separate
-container process to keep files inside a docker volume and on the host in sync.
-There are some caveats to this which require some initial workflow adjustments.
-
-### Installation
-
-Install mutagen-compose via Homebrew: `brew install mutagen-compose`
-
-Once installed you will need to adjust your `docker-compose.yml` file to include
-a new `x-mutagen` key with the Mutagen sync configuration you want.
-
-Examples of this are forthcoming, but the sample `mutagen.yml` file has most of
-what you need and can generally be copied as-is to the `x-mutagen` key. One of
-the few updates would be the `beta` source as that no longer requires the special
-URL of `docker://` but can reference the volume directly.
-
-### You need to populate the docker volume first before you start Mutagen-Compose
-
-Mutagen-Compose will run as a "root" user and will not necessarily respect the
-existing permissions of the Docker volume (if it exists). This means that files
-inside the Docker container will be owned by root and unable to be edited by
-the user the container runs as. This will present problems as PHP or other
-containers attempt to write files (e.g. logs, static content).
-
-#### Populating the Docker volume first
-
-Pre-populating the volume is a relatively straight forward process that should
-only need to be completed when initializing the project (or after deleting
-the volume):
-
-1. Start the PHP container (or any container that uses the volume)
-`docker compose up -d php`
-1. Copy the files from the host to volume: `docker compose copy -R . php:/app`
-1. Wait for the process to finish
-1. Stop the container: `docker compose down`
-
-#### Starting the project
-
-Once the volume has been prepopulated with the code, then to start the project
-you just use `mutagen-compose` instead of `docker compose`. The mutagen script
-is a wrapper for `docker compose` and supports all of Docker Compose's
-commands.
-
-## Global Project Services Setup
-
-You can read how to install Traefik, StepCA and CoreDNS in the [Global Project Services Setup](documentation/globalServicesSetup.md) document.
+1. Install via GitMan
+1. Create / update `.env` file using this as a template
+   ```
+   DOMAIN="example.lan"
+   WILDCARD_DOMAIN="*.example.lan"
+   SITE_ID="example"
+   COMPOSE_PROJECT_NAME=$SITE_ID
+   ```
+1. If using Mutagen Compose, [seed the docker volume](mutagen-compose.md#populating-the-docker-volume-first)
+1. Start Docker project
+   - If using Mutagen Compose
+   ```
+   mutagen-compose up -d
+   ```
+   - If using Docker
+   ```
+   docker compose up -d && mutagen project start
+   ```
+   - If using Mutagen and configured with a `beforeCreate` action
+    ```
+    mutagen project start
+    ```
