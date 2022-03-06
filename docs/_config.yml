@@ -1,5 +1,5 @@
 ---
-name: DevEnv Docker
+title: Docker based DevEnv
 description: A sample PHP development environment using Docker
 theme: jekyll-theme-midnight
 show_downloads: false
