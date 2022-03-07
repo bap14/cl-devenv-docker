@@ -21,11 +21,15 @@ echo "GitMan Root: ${GITMAN_ROOT}"
 echo "GitMan Location: ${GITMAN_LOCATION}"
 echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
-read -p "Enter Project Name: " ProjectID
+echo -n "Enter Project Name: "
+read ProjectID
+echo ""
 ProjectID="$(CleanID ""${ProjectID}"")"
 
 while [[ -z "${ProjectID}" ]]; do
-  read -p "Enter Project Name: " ProjectID
+  echo -n "Enter Project Name: "
+  read ProjectID
+  echo ""
   ProjectID="$(CleanID ""${ProjectID}"")"
 done
 
