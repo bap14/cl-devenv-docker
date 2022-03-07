@@ -7,7 +7,7 @@ cd $(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 function CleanID {
   local id="$1"
   id="$(sed 's/[^a-z0-9_-]//ig' <<< "${id}")"
-  id
+  $id
 }
 
 SOURCE_NAME="${PWD##*/}"
@@ -21,13 +21,14 @@ echo "GitMan Root: ${GITMAN_ROOT}"
 echo "GitMan Location: ${GITMAN_LOCATION}"
 echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
-echo -n "Enter Project Name: "
+# TODO: Figure out why this never prompts?
+echo "Enter Project Name: "
 read ProjectID
 echo ""
 ProjectID="$(CleanID ""${ProjectID}"")"
 
 while [[ -z "${ProjectID}" ]]; do
-  echo -n "Enter Project Name: "
+  echo "Enter Project Name: "
   read ProjectID
   echo ""
   ProjectID="$(CleanID ""${ProjectID}"")"
