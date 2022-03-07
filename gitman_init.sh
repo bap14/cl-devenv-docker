@@ -22,7 +22,9 @@ echo "GitMan Location: ${GITMAN_LOCATION}"
 echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
 while :; do
-  ProjectId="$(read -p 'Project Name: ' ProjectID; echo "${ProjectID}")"
+  echo -n "Enter Project Name: "
+  read ProjectID
+  echo ""
   ProjectID="$(CleanID ""${ProjectID}"")"
   # If it's empty, continue the loop; otherwise, break!
   [[ -z "${ProjectID}" ]] || break
