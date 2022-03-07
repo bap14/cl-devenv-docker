@@ -37,16 +37,9 @@ echo "Cleaned Project ID: '${ProjectID}'"
 # Link from persistent directory to source
 [[ -L persistent/source ]] || ln -s ${SOURCE_DIR_FROM_PERSIST_DIR} persistent/source
 
-# Create symlinks in persistent to source files
-[[ -L persistent/database ]] || ln -s source/database persistent/database
-[[ -L persistent/elasticsearch ]] || ln -s source/elasticsearch persistent/elasticsearch
-[[ -L persistent/nginx ]] || ln -s source/nginx persistent/nginx
-[[ -L persistent/secrets ]] || ln -s source/secrets persistent/secrets
-[[ -L persistent/varnish ]] || ln -s source/varnish persistent/varnish
-[[ -L persistent/docker-compose.yml ]] || ln -s source/docker-compose.yml persistent/docker-compose.yml
-
 # Copy sample files to persistent directory if they do not exist yet.
 [[ -f persistent/.gitignore ]] || cp .gitignore.sample persistent/.gitignore
+[[ -f persistent/docker-compose.yml ]] || cp docker-compose.yml persistent/docker-compose.yml
 [[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/.env > persistent/.env
 [[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
 [[ -d persisent/database ]] || cp -R database persisent/
