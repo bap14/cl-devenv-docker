@@ -9,7 +9,7 @@ afterTerminate:
 sync:
   magento:
     alpha: "../../"
-    beta: "docker://#{}_php/app/"
+    beta: "docker://{{ID}}_php/app/"
     mode: "two-way-resolved"
     symlink:
       mode: "ignore"
