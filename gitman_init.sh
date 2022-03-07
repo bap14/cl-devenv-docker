@@ -7,7 +7,7 @@ cd $(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 function CleanID {
   local id="$1"
   id="$(sed 's/[^a-z0-9_-]//ig' <<< "${id}")"
-  $id
+  echo "$id"
 }
 
 SOURCE_NAME="${PWD##*/}"
