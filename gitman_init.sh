@@ -35,16 +35,16 @@ echo "Cleaned Project ID: '${ProjectID}'"
 [[ -L persistent ]] || ln -s ${PERSIST_DIR} persistent
 
 # Link from persistent directory to source
-[[ -L persistent/source ]] || ln -s ${SOURCE_DIR_FROM_PERSIST_DIR} persistent/source
+# [[ -L persistent/source ]] || ln -s ${SOURCE_DIR_FROM_PERSIST_DIR} persistent/source
 
 # Create symlinks for things that don't change each project
-[[ -L persisent/database ]] || ln -s database persistent/database
-[[ -L persisent/elasticsearch ]] || ln -s elasticsearch persistent/elasticsearch
+[[ -L persistent/database ]] || ln -s database persistent/database
+[[ -L persistent/elasticsearch ]] || ln -s elasticsearch persistent/elasticsearch
 
 # Copy sample configuration directories if they do not exist yet.
-[[ -d persisent/nginx ]] || cp -R nginx persisent/
-[[ -d persisent/secrets ]] || mkdir persisent/secrets
-[[ -d persisent/varnish ]] || cp -R varnish persisent/
+[[ -d persistent/nginx ]] || cp -R nginx persistent/
+[[ -d persistent/secrets ]] || mkdir persistent/secrets
+[[ -d persistent/varnish ]] || cp -R varnish persistent/
 
 # Copy sample files to persistent directory if they do not exist yet.
 [[ -f persistent/.gitignore ]] || cp .gitignore.sample persistent/.gitignore
@@ -53,5 +53,5 @@ echo "Cleaned Project ID: '${ProjectID}'"
 [[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
 
 # Generate database passwords if they don't exist
-[[ -f persisent/secrets/mariadb.root.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w ${1:-32} | head -n 1 > mariadb.root.secret
-[[ -f persisent/secrets/mariadb.user.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w ${1:-16} | head -n 1 > mariadb.user.secret
+[[ -f persistent/secrets/mariadb.root.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w ${1:-32} | head -n 1 > persistent/secrets/mariadb.root.secret
+[[ -f persistent/secrets/mariadb.user.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w ${1:-16} | head -n 1 > persistent/secrets/mariadb.user.secret
