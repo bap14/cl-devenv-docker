@@ -1,0 +1,166 @@
+networks:
+  # Use the pre-existing traefik network so Traefik can route traffic to the containers
+  traefik-backbone:
+    external: true
+  # Local network for inter-container communication with access to internet
+  devnet:
+
+secrets:
+  mariadb_root_password:
+    file: secrets/mariadb.root.secret
+  mariadb_password:
+    file: secrets/mariadb.user.secret
+
+# Local Docker volumes for effeciency and data persistence
+volumes:
+  codebase:
+  database:
+  redisdata:
+  elasticsearchdata:
+
+services:
+  varnish:
+    image: varnish:alpine
+    container_name: ${SITE_ID}_varnish
+    networks:
+      - devnet
+      - traefik-backbone
+    restart: unless-stopped
+    depends_on:
+      http:
+        condition: service_started
+    volumes:
+      - ${PWD}/varnish/default.vcl:/etc/varnish/default.vcl
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${SITE_ID}.rule=Host(`$DOMAIN`, `$WILDCARD_DOMAIN`)
+      - traefik.http.routers.${SITE_ID}.entrypoints=http,https
+      - traefik.http.routers.${SITE_ID}.tls=true
+      - traefik.http.routers.${SITE_ID}.tls.certresolver=stepCA
+      - traefik.http.routers.${SITE_ID}.tls.domains[0].main=$DOMAIN
+      - traefik.http.routers.${SITE_ID}.tls.domains[0].sans=$WILDCARD_DOMAIN
+      - traefik.http.routers.${SITE_ID}.service=${SITE_ID}-web
+      - traefik.http.services.${SITE_ID}-web.loadbalancer.server.port=80
+      - traefik.http.services.${SITE_ID}-web.loadbalancer.server.scheme=http
+
+  nginx:
+    image: nginx:latest
+    container_name: ${SITE_ID}_nginx
+    restart: unless-stopped
+    depends_on:
+      - php
+    networks:
+      - devnet
+    volumes:
+      # Set the php upstream
+      - ${PWD}/nginx/php_upstream.conf:/etc/nginx/conf.d/php_upstream.conf
+      # The Magento configuration
+      - ${PWD}/nginx/magento.include:/etc/nginx/conf.d/magento.include
+      # A default sane Magento nginx config
+      - ${PWD}/nginx/default_vhost.conf:/etc/nginx/conf.d/default.conf
+      # Docker-local copy of the codebase
+      - codebase:/app/
+
+  php:
+    image: registry.gitlab.com/bapxiv/php:7.4-fpm-alpine
+    container_name: ${SITE_ID}_php
+    restart: unless-stopped
+    depends_on:
+      database:
+        # condition: service_healthy
+        condition: service_started
+      redis:
+        # condition: service_healthy
+        condition: service_started
+      elasticsearch:
+        condition: service_started
+    networks:
+      - devnet
+    volumes:
+      # Docker-local copy of codebase
+      - codebase:/app/
+
+  database:
+    image: mariadb:10.4
+    container_name: ${SITE_ID}_database
+    restart: unless-stopped
+    environment:
+      MARIADB_USER: ${SITE_ID:-magento}
+      MARIADB_DATABASE: ${SITE_ID:-magento}_db
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_root_password
+      MARIADB_PASSWORD_FILE: /run/secrets/mariadb_password
+    volumes:
+      - database:/var/lib/mysql
+      - ${PWD}/database/generate-my-cnf.sh:/usr/local/bin/generate-my-cnf.sh
+    shm_size: 2gb
+    healthcheck:
+      test: 'mysqladmin ping -h localhost -p$$(cat /run/secrets/mariadb_password)'
+      interval: 5s
+      timeout: 2s
+      retries: 2
+    networks:
+      - devnet
+    secrets:
+      - mariadb_root_password
+      - mariadb_password
+
+  redis:
+    image: redis:6.0-alpine
+    container_name: ${SITE_ID}_redis
+    restart: unless-stopped
+    sysctls:
+      net.core.somaxconn: 1024
+    healthcheck:
+      test: 'redis-cli ping || exit 1'
+      interval: 10s
+      timeout: 5s
+      retries: 2
+    networks:
+      - devnet
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 20000
+        hard: 40000
+    volumes:
+      - redisdata:/data
+
+  elasticsearch:
+    image: elasticsearch:7.12.1
+    container_name: ${SITE_ID}_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - elasticsearchdata:/usr/share/elasticsearch/data
+      - ${PWD}/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    networks:
+      - devnet
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  # PHPMyAdmin style web DB interface
+  adminer:
+    image: adminer:latest
+    container_name: ${SITE_ID}_adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+      ADMINER_PLUGINS: "tables-filter"
+    networks:
+      - devnet
+      - traefik-backbone
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${SITE_ID}-adminer.rule=Host(`db.$DOMAIN`)
+      - traefik.http.routers.${SITE_ID}-adminer.entrypoints=http,https
+      - traefik.http.routers.${SITE_ID}-adminer.tls=true
+      - traefik.http.routers.${SITE_ID}-adminer.tls.certresolver=stepCA
+      - traefik.http.routers.${SITE_ID}-adminer.tls.domains[0].main=$DOMAIN
+      - traefik.http.routers.${SITE_ID}-adminer.tls.domains[0].sans=$WILDCARD_DOMAIN
+      - traefik.http.routers.${SITE_ID}-adminer.service=${SITE_ID}-adminer
+      - traefik.http.services.${SITE_ID}-adminer.loadbalancer.server.port=8080
+      - traefik.http.services.${SITE_ID}-adminer.loadbalancer.server.scheme=http
