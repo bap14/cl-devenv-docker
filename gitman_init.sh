@@ -6,7 +6,7 @@ cd $(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 
 function CleanID {
   local id="$1"
-  id="$(sed 's/[^a-z0-9_-]//ig' <<< ${id})"
+  id="$(sed 's/[^a-z0-9_-]//ig' <<< "${id}")"
   id
 }
 
@@ -47,8 +47,8 @@ echo "Cleaned Project ID: '${ProjectID}'"
 
 # Copy sample files to persistent directory if they do not exist yet.
 [[ -f persistent/.gitignore ]] || cp .gitignore.sample persistent/.gitignore
-[[ -f persistent/.env ]] || awk '{gsub(/#{}/,"'${ProjectID}'",$0); print $0}' templates/.env persistent/.env
-[[ -f persistent/mutagen.yml ]] || awk '{gsub(/#{}/,"'${ProjectID}'",$0); print $0}' templates/mutagen.yml persistent/mutagen.yml
+[[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/#{}/,prjid,$0); print $0}' templates/.env persistent/.env
+[[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/#{}/,prjid,$0); print $0}' templates/mutagen.yml persistent/mutagen.yml
 [[ -d persisent/database ]] || cp -R database persisent/
 [[ -d persisent/elasticsearch ]] || cp -R elasticsearch persisent/
 [[ -d persisent/nginx ]] || cp -R nginx persisent/
