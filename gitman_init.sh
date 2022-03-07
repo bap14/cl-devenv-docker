@@ -19,7 +19,7 @@ SOURCE_DIR_FROM_PERSIST_DIR="${GITMAN_LOCATION}/${SOURCE_NAME}"
 echo "Source Name: ${SOURCE_NAME}"
 echo "GitMan Root: ${GITMAN_ROOT}"
 echo "GitMan Location: ${GITMAN_LOCATION}"
-echo "Clean ID: ${CLEAN_ID}"
+echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
 while :; do
   read -p "Project Name: " ProjectID
