@@ -4,7 +4,7 @@ set -eu
 # Move to realpath
 cd $(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 
-CleanID {
+function CleanID {
   local id="$1"
   id="$(sed 's/[^a-z0-9_-]//ig' <<< ${id})"
   id
