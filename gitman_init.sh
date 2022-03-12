@@ -56,5 +56,5 @@ echo "Cleaned Project ID: '${ProjectID}'"
 [[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
 
 # Generate database passwords if they don't exist
-[[ -f persistent/secrets/mariadb.root.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w ${1:-32} | head -n 1 > persistent/secrets/mariadb.root.secret
-[[ -f persistent/secrets/mariadb.user.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w ${1:-16} | head -n 1 > persistent/secrets/mariadb.user.secret
+[[ -f persistent/secrets/mariadb.root.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 32 | head -n 1 > persistent/secrets/mariadb.root.secret
+[[ -f persistent/secrets/mariadb.user.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 16 | head -n 1 > persistent/secrets/mariadb.user.secret
