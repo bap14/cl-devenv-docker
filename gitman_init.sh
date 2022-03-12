@@ -35,7 +35,11 @@ echo "GitMan Location: ${GITMAN_LOCATION}"
 echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
 [[ -z "$ProjectID" ]] || ProjectID=$(CleanID "${ProjectID}")
-[[ -n "$ProjectID" ]] || PromptForProjectID
+while [[ -z "${ProjectID}" ]]; do
+  printf "%s" "Enter Project Name: "
+  read ProjectID
+  ProjectID="$(CleanID ""${ProjectID}"")"
+done
 
 echo "Cleaned Project ID: '${ProjectID}'"
 
