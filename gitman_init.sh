@@ -4,10 +4,23 @@ set -eu
 # Move to realpath
 cd $(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 
+# Read command line args
+ProjectID=""
+[[ "$#" > "0" ]] && ProjectID="$*"
+
 function CleanID {
-  local id="$1"
-  id="$(sed 's/[^a-z0-9_-]//ig' <<< "${id}")"
+  local id="$*"
+  id="$(sed 's/ /-/ig' <<< ""${id}"")"
+  id="$(sed 's/[^a-z0-9_-]//ig' <<< ""${id}"")"
   echo "$id"
+}
+
+function PromptForProjectID {
+  while [[ -z "${ProjectID}" ]]; do
+    printf "%s" "Enter Project Name: "
+    read ProjectID
+    ProjectID="$(CleanID ""${ProjectID}"")"
+  done
 }
 
 SOURCE_NAME="${PWD##*/}"
@@ -21,26 +34,13 @@ echo "GitMan Root: ${GITMAN_ROOT}"
 echo "GitMan Location: ${GITMAN_LOCATION}"
 echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
-# TODO: Figure out why this never prompts?
-echo "Enter Project Name: "
-read ProjectID
-echo ""
-ProjectID="$(CleanID ""${ProjectID}"")"
-
-while [[ -z "${ProjectID}" ]]; do
-  echo "Enter Project Name: "
-  read ProjectID
-  echo ""
-  ProjectID="$(CleanID ""${ProjectID}"")"
-done
+[[ -z "$ProjectID" ]] || ProjectID=$(CleanID "${ProjectID}")
+[[ -n "$ProjectID" ]] || PromptForProjectID
 
 echo "Cleaned Project ID: '${ProjectID}'"
 
 # Link from source directory to persistent directory
 [[ -L persistent ]] || ln -s ${PERSIST_DIR} persistent
-
-# Link from persistent directory to source
-# [[ -L persistent/source ]] || ln -s ${SOURCE_DIR_FROM_PERSIST_DIR} persistent/source
 
 # Create symlinks for things that don't change each project
 [[ -L persistent/database ]] || ln -s database persistent/database
