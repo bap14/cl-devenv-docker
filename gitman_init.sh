@@ -15,14 +15,6 @@ function CleanID {
   echo "$id"
 }
 
-function PromptForProjectID {
-  while [[ -z "${ProjectID}" ]]; do
-    printf "%s" "Enter Project Name: "
-    read ProjectID
-    ProjectID="$(CleanID ""${ProjectID}"")"
-  done
-}
-
 SOURCE_NAME="${PWD##*/}"
 GITMAN_ROOT="../../"
 PERSIST_DIR="${GITMAN_ROOT}"
@@ -34,11 +26,13 @@ echo "GitMan Root: ${GITMAN_ROOT}"
 echo "GitMan Location: ${GITMAN_LOCATION}"
 echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
-[[ -z "$ProjectID" ]] || ProjectID=$(CleanID "${ProjectID}")
+[[ -z "$ProjectID" ]] || ProjectID=`CleanID "${ProjectID}"`
+# TODO: Determine why this never prompts ... maybe use ``cmd`` instead of $(cmd)?
+# It stops execution, but it doesn't ever print the printf line
 while [[ -z "${ProjectID}" ]]; do
-  printf "%s" "Enter Project Name: "
+  printf "%s: " "Enter Project Name"
   read ProjectID
-  ProjectID="$(CleanID ""${ProjectID}"")"
+  ProjectID=`CleanID "${ProjectID}"`
 done
 
 echo "Cleaned Project ID: '${ProjectID}'"
