@@ -85,8 +85,8 @@ done
 [[ -L persistent/source ]] || ln -s ${SOURCE_DIR_FROM_PERSIST_DIR} persistent/source
 
 # Create symlinks for things that don't change each project
-[[ -d persistent/database -o -L persistent/database ]] || ln -s source/database persistent/database
-[[ -d persistent/elasticsearch -o -L persistent/elasticsearch ]] || ln -s source/elasticsearch persistent/elasticsearch
+[[ -d persistent/database || -L persistent/database ]] || ln -s source/database persistent/database
+[[ -d persistent/elasticsearch || -L persistent/elasticsearch ]] || ln -s source/elasticsearch persistent/elasticsearch
 
 # Copy sample configuration directories if they do not exist yet.
 [[ -d persistent/nginx ]] || cp -R nginx persistent/
