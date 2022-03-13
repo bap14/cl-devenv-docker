@@ -68,8 +68,9 @@ those services that are shared across all projects.
             - ./gitman_init.sh
       ```
       - The `gitman_init.sh` script will prompt for the project identifier
-         which would be something like "devenv" or "my-test-site". You can suppress this prompt by passing the project identifier as the first
-         argument to this script: `./gitman_init.sh "my-development-site"`
+         which would be something like "devenv" or "my-test-site". You can
+         suppress this prompt by passing the project identifier as an argument 
+         to this script. E.g. `./gitman_init.sh "my-development-site"`
       - The project identifier uses all passed arguments to create the project
         the identifier. It will automatically sanitize it so it only includes
         letters, numbers, underscores and dashes. The following commands are
@@ -84,12 +85,17 @@ those services that are shared across all projects.
 1. Update the `dev-db-sync` script for your environment
    1. **For Magento Cloud**
       1. Update `dev-db-sync.cloud.sh` and specify the Magento
-         Cloud project ID, or alter it to retrieve data from an separate server.
+         Cloud project ID, or alter it to retrieve data from an separate server
    3. **For On-Prem Magento**
       1. Update `dev-db-sync.on-prem.sh` and specify the SSH host and user to
          connect as.
-2. If using Mutagen Compose, [seed the docker volume](mutagen-compose.md#populating-the-docker-volume-first)
-3. Start Docker project
+1. Run the `dev-db-sync` script to populate Docker container with remote data
+2. Update your app configuration to point to the proper docker containers
+   1. You can use the service name or alias (if one is provided) in the
+      `docker-compose.yml` file as the host for your configurations.
+      E.g. `'db_host' => 'mysql://docker/my_db'
+3. If using Mutagen Compose, [seed the docker volume](mutagen-compose.md#populating-the-docker-volume-first)
+4. Start Docker project
    - If using Mutagen Compose
      ```bash
      mutagen-compose up -d
