@@ -1,22 +1,28 @@
 #!/usr/bin/env bash
 set -eu
 
-# Move to realpath
-cd $(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
-
-# Read command line args
-ProjectID=""
-[[ "$#" > "0" ]] && ProjectID="$*"
-
+# Clean an identifier to only allow letters, numbers, underscores and dashes
 function CleanID {
+  echo "Cleaning string">&2
   local id="$*"
+  # Start with a letter or number
+  id="$(sed 's/^[^a-z0-9]*//i' <<< ""${id}"")"
+  # End with a letter or number
+  id="$(sed 's/[^a-z0-9]*$//i' <<< ""${id}"")"
+  # Swap spaces for dashes
   id="$(sed 's/ /-/ig' <<< ""${id}"")"
+  # Replace all duplicate dashes with single dash
+  id="$(sed 's/---*/-/g' <<< ""${id}"")"
+  # Remove anything that isn't a letter, number, underscore or dash
   id="$(sed 's/[^a-z0-9_-]//ig' <<< ""${id}"")"
   echo "$id"
 }
 
-# This specifically doesn't use a sub-shell to hopefully work around the prompt issue
+# Prompt for user-input for a project identifier if one is not provided via 
+# args
 function AskForProjectID {
+  # The name of the variable to be populated (optional, required if this 
+  # should not be executed in subshell)
   local __resultvar=$1
   local str
   echo "Please enter a project identifier (e.g. devenv):"
@@ -30,6 +36,32 @@ function AskForProjectID {
   fi
 }
 
+function WriteRandomStringToFile {
+  local length="32"
+  local file=""
+
+  [[ "$1" ]] && file="$1"
+  if [[ ! "$file" ]]; then
+    echo "File parameter must be supplied"
+    exit 1
+  fi
+
+  [[ "$2" ]] && length="$2"
+  [[ "$2" > 0 ]] || length="32"
+
+  cat /dev/urandom \
+    | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' \
+    | fold -w $length \
+    | head -n 1 > "$file"
+}
+
+# Move to realpath
+cd $(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+
+# Read all command line args as project identifier
+ProjectID=""
+[[ "$#" > "0" ]] && ProjectID=$(CleanID "$*")
+
 SOURCE_NAME="${PWD##*/}"
 GITMAN_ROOT="../../"
 PERSIST_DIR="${GITMAN_ROOT}"
@@ -41,18 +73,20 @@ SOURCE_DIR_FROM_PERSIST_DIR="${GITMAN_LOCATION}/${SOURCE_NAME}"
 #echo "GitMan Location: ${GITMAN_LOCATION}"
 #echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
+# If no project identifier passed, prompt for one
 while [[ -z "${ProjectID}" ]]; do
   AskForProjectID ProjectID
 done
 
-echo "Cleaned Project ID: '${ProjectID}'"
-
 # Link from source directory to persistent directory
 [[ -L persistent ]] || ln -s ${PERSIST_DIR} persistent
 
+# Link from persistent directory to source
+[[ -L persistent/source ]] || ln -s ${SOURCE_DIR_FROM_PERSIST_DIR} persistent/source
+
 # Create symlinks for things that don't change each project
-[[ -L persistent/database ]] || ln -s database persistent/database
-[[ -L persistent/elasticsearch ]] || ln -s elasticsearch persistent/elasticsearch
+[[ -d persistent/database -o -L persistent/database ]] || ln -s source/database persistent/database
+[[ -d persistent/elasticsearch -o -L persistent/elasticsearch ]] || ln -s source/elasticsearch persistent/elasticsearch
 
 # Copy sample configuration directories if they do not exist yet.
 [[ -d persistent/nginx ]] || cp -R nginx persistent/
@@ -62,12 +96,11 @@ echo "Cleaned Project ID: '${ProjectID}'"
 # Copy sample files to persistent directory if they do not exist yet.
 [[ -f persistent/.gitignore ]] || cp .gitignore.sample persistent/.gitignore
 [[ -f persistent/docker-compose.yml ]] || cp docker-compose.yml persistent/docker-compose.yml
+
+# Generate files and replace placeholder with project identifier
 [[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/.env > persistent/.env
 [[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
 
 # Generate database passwords if they don't exist
-[[ -f persistent/secrets/mariadb.root.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 32 | head -n 1 > persistent/secrets/mariadb.root.secret
-[[ -f persistent/secrets/mariadb.user.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 16 | head -n 1 > persistent/secrets/mariadb.user.secret
-
-#[[ grep '{{ID}}' persistent/.env ]] && showDotEnvInstructions
-#[[ grep '{{ID}}' persistent/mutagen.yml ]] && showMutagenInstructions
+[[ -f persistent/secrets/mariadb.root.secret ]] || WriteRandomStringToFile persistent/secrets/mariadb.root.secret
+[[ -f persistent/secrets/mariadb.user.secret ]] || WriteRandomStringToFile persistent/secrets/mariadb.user.secret 16
