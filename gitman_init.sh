@@ -23,7 +23,11 @@ function AskForProjectID {
   read str
   str=$(CleanID "${str}")
   
-  [[ -n "$__resultvar" ]] && { eval $__resultvar="${str}" } || echo "${str}"
+  if [[ "$__resultvar" ]]; then
+    eval $__resultvar="${str}"
+  else
+    echo "${str}"
+  fi
 }
 
 SOURCE_NAME="${PWD##*/}"
