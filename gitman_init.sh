@@ -71,12 +71,7 @@ PERSIST_DIR="${GITMAN_ROOT}"
 GITMAN_LOCATION=$(cd $(pwd -P)/../;echo ${PWD##*/})
 SOURCE_DIR_FROM_PERSIST_DIR="${GITMAN_LOCATION}/${SOURCE_NAME}"
 
-#echo "Source Name: ${SOURCE_NAME}"
-#echo "GitMan Root: ${GITMAN_ROOT}"
-#echo "GitMan Location: ${GITMAN_LOCATION}"
-#echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
-
-# If no project identifier passed, prompt for one
+# If no project identifier passed, prompt for one (without a subshell)
 while [[ -z "${ProjectID}" ]]; do
   AskForProjectID ProjectID
 done
