@@ -6,6 +6,7 @@
   - [Examples](#examples)
     - [Mount an additional file inside the PHP container](#mount-an-additional-file-inside-the-php-container)
     - [Replace a container service version](#replace-a-container-service-version)
+- [Resetting DevEnv to clean slate](#resetting-devenv-to-clean-slate)
 
 ## Docker DevEnv
 
@@ -157,3 +158,42 @@ services:
     # Test out a specific version of Redis
     image: redis:7.12-alpine
 ```
+
+## Resetting DevEnv to clean slate
+
+1. Remove all files
+   ```
+   rm -rf .env \
+          .gitignore \
+          database \
+          elasticsearch \
+          docker-compose.yml \
+          mutagen.yml \
+          nginx \
+          repo_sources \
+          secrets \
+          varnish \
+          source
+   ```
+1. If you had a `docker-compose.local.yml` file you can delete it if you no
+   longer need those customizations
+1. Remove the docker containers and volumes
+   1. Stop any running docker containers for this project
+      ```bash
+      # Generic Docker command
+      docker compose down
+      # Mutagen Command
+      mutagen project terminate
+      # Mutagen-Compose Command
+      mutagen-compose down
+      ```
+   1. List Docker volumes, filtering by project
+      ```bash
+      . ./.env; docker volume list | grep ${SITE_ID}
+      ```
+   1. Remove the docker volums listed
+      ```bash
+      docker volume rm $(. ./.env; docker volume list | grep ${SITE_ID} | awk '{print $2}')
+      ```
+1. Run through the [Per Project Configuration](#per-project-configuration) steps
+   again.
