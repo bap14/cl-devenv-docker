@@ -40,14 +40,17 @@ function WriteRandomStringToFile {
   local length="32"
   local file=""
 
-  [[ "$1" ]] && file="$1"
-  if [[ ! "$file" ]]; then
+  if [[ "$#" == 0 ]]; then
     echo "File parameter must be supplied"
     exit 1
   fi
 
-  [[ "$2" ]] && length="$2"
-  [[ "$2" > 0 ]] || length="32"
+  [[ "$1" ]] && file="$1"
+
+  if [[ "$#" > 1 ]]; then
+    [[ "$2" ]] && length="$2"
+    [[ "$2" > 0 ]] || length="32"
+  fi
 
   cat /dev/urandom \
     | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' \
