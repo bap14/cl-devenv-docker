@@ -19,20 +19,11 @@ function CleanID {
 function AskForProjectID {
   local __resultvar=$1
   local str
-  echo "This is a test echo inside a function before a read call"
+  echo "Please enter a project identifier (e.g. devenv):"
   read str
-  echo "The value entered was: ${str}"
   str=$(CleanID "${str}")
   
-  [[ -n "$__resultvar" ]] && eval $__resultvar="${str}" || echo "${str}"
-}
-
-function showDotEnvInstructions {
-  echo "Instructions to update .env file"
-}
-
-function showMutagenInstructions {
-  echo "Instructions to update mutagen.yml file"
+  [[ -n "$__resultvar" ]] && { eval $__resultvar="${str}" } || echo "${str}"
 }
 
 SOURCE_NAME="${PWD##*/}"
@@ -67,12 +58,12 @@ echo "Cleaned Project ID: '${ProjectID}'"
 # Copy sample files to persistent directory if they do not exist yet.
 [[ -f persistent/.gitignore ]] || cp .gitignore.sample persistent/.gitignore
 [[ -f persistent/docker-compose.yml ]] || cp docker-compose.yml persistent/docker-compose.yml
-#[[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/.env > persistent/.env
-#[[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
+[[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/.env > persistent/.env
+[[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
 
 # Generate database passwords if they don't exist
 [[ -f persistent/secrets/mariadb.root.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 32 | head -n 1 > persistent/secrets/mariadb.root.secret
 [[ -f persistent/secrets/mariadb.user.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 16 | head -n 1 > persistent/secrets/mariadb.user.secret
 
-[[ grep '{{ID}}' persistent/.env ]] && showDotEnvInstructions
-[[ grep '{{ID}}' persistent/mutagen.yml ]] && showMutagenInstructions
+#[[ grep '{{ID}}' persistent/.env ]] && showDotEnvInstructions
+#[[ grep '{{ID}}' persistent/mutagen.yml ]] && showMutagenInstructions
