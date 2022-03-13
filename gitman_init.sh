@@ -15,24 +15,39 @@ function CleanID {
   echo "$id"
 }
 
+# This specifically doesn't use a sub-shell to hopefully work around the prompt issue
+function AskForProjectID {
+  local __resultvar = $1
+  local str
+  echo "This is a test echo inside a function before a read call"
+  read str
+  echo "The value entered was: ${str}"
+  str = $(CleanID "${str}")
+  
+  [[ -n "$__resultvar" ]] && eval $__resultvar = "${str}" || echo "${str}"
+}
+
+function showDotEnvInstructions {
+  echo "Instructions to update .env file"
+}
+
+function showMutagenInstructions {
+  echo "Instructions to update mutagen.yml file"
+}
+
 SOURCE_NAME="${PWD##*/}"
 GITMAN_ROOT="../../"
 PERSIST_DIR="${GITMAN_ROOT}"
 GITMAN_LOCATION=$(cd $(pwd -P)/../;echo ${PWD##*/})
 SOURCE_DIR_FROM_PERSIST_DIR="${GITMAN_LOCATION}/${SOURCE_NAME}"
 
-echo "Source Name: ${SOURCE_NAME}"
-echo "GitMan Root: ${GITMAN_ROOT}"
-echo "GitMan Location: ${GITMAN_LOCATION}"
-echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
+#echo "Source Name: ${SOURCE_NAME}"
+#echo "GitMan Root: ${GITMAN_ROOT}"
+#echo "GitMan Location: ${GITMAN_LOCATION}"
+#echo "Source Dir from Persist Dir: ${SOURCE_DIR_FROM_PERSIST_DIR}"
 
-[[ -z "$ProjectID" ]] || ProjectID=`CleanID "${ProjectID}"`
-# TODO: Determine why this never prompts ... maybe use ``cmd`` instead of $(cmd)?
-# It stops execution, but it doesn't ever print the printf line
 while [[ -z "${ProjectID}" ]]; do
-  printf "%s: " "Enter Project Name"
-  read ProjectID
-  ProjectID=`CleanID "${ProjectID}"`
+  AskForProjectID ProjectID
 done
 
 echo "Cleaned Project ID: '${ProjectID}'"
@@ -52,9 +67,12 @@ echo "Cleaned Project ID: '${ProjectID}'"
 # Copy sample files to persistent directory if they do not exist yet.
 [[ -f persistent/.gitignore ]] || cp .gitignore.sample persistent/.gitignore
 [[ -f persistent/docker-compose.yml ]] || cp docker-compose.yml persistent/docker-compose.yml
-[[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/.env > persistent/.env
-[[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
+#[[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/.env > persistent/.env
+#[[ -f persistent/mutagen.yml ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/mutagen.yml > persistent/mutagen.yml
 
 # Generate database passwords if they don't exist
 [[ -f persistent/secrets/mariadb.root.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 32 | head -n 1 > persistent/secrets/mariadb.root.secret
 [[ -f persistent/secrets/mariadb.user.secret ]] || cat /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:][:punct:]' | fold -w 16 | head -n 1 > persistent/secrets/mariadb.user.secret
+
+[[ grep '{{ID}}' persistent/.env ]] && showDotEnvInstructions
+[[ grep '{{ID}}' persistent/mutagen.yml ]] && showMutagenInstructions
