@@ -32,15 +32,25 @@ services:
     volumes:
       - ${PWD}/varnish/default.vcl:/etc/varnish/default.vcl
     labels:
+      # Connect this project into Traefik
       - traefik.enable=true
+      # What requested domains / paths Traefik will route to this project
       - traefik.http.routers.${SITE_ID}.rule=Host(`$DOMAIN`, `$WILDCARD_DOMAIN`)
+      # What request methods are allowed via this HTTP router
       - traefik.http.routers.${SITE_ID}.entrypoints=http,https
+      # Whether to use SSL/TLS
       - traefik.http.routers.${SITE_ID}.tls=true
+      # The Certificate Resolver to use
       - traefik.http.routers.${SITE_ID}.tls.certresolver=stepCA
+      # The primary domain to secure
       - traefik.http.routers.${SITE_ID}.tls.domains[0].main=$DOMAIN
+      # Any secondary domains to secure
       - traefik.http.routers.${SITE_ID}.tls.domains[0].sans=$WILDCARD_DOMAIN
+      # Unique name of the HTTP service for this container
       - traefik.http.routers.${SITE_ID}.service=${SITE_ID}-web
+      # Port Traefik connects to this container on
       - traefik.http.services.${SITE_ID}-web.loadbalancer.server.port=80
+      # HTTP scheme Traefik connects to this container on
       - traefik.http.services.${SITE_ID}-web.loadbalancer.server.scheme=http
 
   nginx:
@@ -66,6 +76,9 @@ services:
     container_name: ${SITE_ID}_php
     restart: unless-stopped
     depends_on:
+      # This servie depends on the following services. Enabling the "service_healthy"
+      # condition will lengthen start up times, but ensure services are 100% ready
+      # before starting this container. Recommended for stage / production envs.
       database:
         # condition: service_healthy
         condition: service_started
@@ -90,9 +103,13 @@ services:
       MARIADB_ROOT_PASSWORD_FILE: /run/secrets/mariadb_root_password
       MARIADB_PASSWORD_FILE: /run/secrets/mariadb_password
     volumes:
+      # Docker-local persistent storage. Restarting container will not reset DB
       - database:/var/lib/mysql
+      # Used by script when copying database from staging if .my.cnf file does
+      # not exist yet
       - ${PWD}/database/generate-my-cnf.sh:/usr/local/bin/generate-my-cnf.sh
     shm_size: 2gb
+    # This is used to report the service as healthy
     healthcheck:
       test: 'mysqladmin ping -h localhost -p$$(cat /run/secrets/mariadb_password)'
       interval: 5s
@@ -110,6 +127,7 @@ services:
     restart: unless-stopped
     sysctls:
       net.core.somaxconn: 1024
+    # This is used to report this service as healthy
     healthcheck:
       test: 'redis-cli ping || exit 1'
       interval: 10s
@@ -123,6 +141,7 @@ services:
         soft: 20000
         hard: 40000
     volumes:
+      # Docker-local storage for redis to persist data between restarts
       - redisdata:/data
 
   elasticsearch:
@@ -132,7 +151,9 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    # NOTE: There is no healthcheck for this service yet
     volumes:
+      # Docker-local storage for elasticsearch data to persiste between restarts
       - elasticsearchdata:/usr/share/elasticsearch/data
       - ${PWD}/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     networks:
