@@ -173,7 +173,8 @@ services:
           repo_sources \
           secrets \
           varnish \
-          source
+          source \
+          dev-db-sync.*.sh
    ```
 1. If you had a `docker-compose.local.yml` file you can delete it if you no
    longer need those customizations
