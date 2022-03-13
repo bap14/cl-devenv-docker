@@ -94,8 +94,8 @@ done
 # Copy files to persistent directory if they do not exist yet.
 [[ -f persistent/.gitignore ]] || cp .gitignore.sample persistent/.gitignore
 [[ -f persistent/docker-compose.yml ]] || cp docker-compose.yml persistent/docker-compose.yml
-[[ -f persistent/dev-db-sync.cloud.sh ]] || cp dev-db-sync.sh persistent/dev-db-sync.cloud.sh
-[[ -f persistent/dev-db-sync.on-prem.sh ]] || cp dev-db-sync.sh persistent/dev-db-sync.on-prem.sh
+[[ -f persistent/dev-db-sync.cloud.sh ]] || cp dev-db-sync.cloud.sh persistent/dev-db-sync.cloud.sh
+[[ -f persistent/dev-db-sync.on-prem.sh ]] || cp dev-db-sync.on-prem.sh persistent/dev-db-sync.on-prem.sh
 
 # Generate files and replace placeholder with project identifier
 [[ -f persistent/.env ]] || awk -v prjid="${ProjectID}" '{gsub(/{{ID}}/,prjid,$0); print $0}' templates/.env > persistent/.env
