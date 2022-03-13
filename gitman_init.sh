@@ -17,14 +17,14 @@ function CleanID {
 
 # This specifically doesn't use a sub-shell to hopefully work around the prompt issue
 function AskForProjectID {
-  local __resultvar = $1
+  local __resultvar=$1
   local str
   echo "This is a test echo inside a function before a read call"
   read str
   echo "The value entered was: ${str}"
-  str = $(CleanID "${str}")
+  str=$(CleanID "${str}")
   
-  [[ -n "$__resultvar" ]] && eval $__resultvar = "${str}" || echo "${str}"
+  [[ -n "$__resultvar" ]] && eval $__resultvar="${str}" || echo "${str}"
 }
 
 function showDotEnvInstructions {
