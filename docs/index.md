@@ -53,7 +53,7 @@ those services that are shared across all projects.
 ## Per-Project Configuration
 
 1. Install via GitMan
-   1. Create a [`gitman.yml`](files/gitman.sample.yml) file:
+   1. Create a `gitman.yml` ([sample file](files/gitman.sample.yml)) file:
       - The `gitman_init.sh` script will prompt for the project identifier
          which would be something like "devenv" or "my-test-site". You can
          suppress this prompt by passing the project identifier as an argument 
