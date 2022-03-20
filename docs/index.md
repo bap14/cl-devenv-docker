@@ -60,12 +60,13 @@ those services that are shared across all projects.
         - name: devenv
           type: git
           repo: git@github.com:bap14/cl-devenv-docker.git
-          rev: main # Or specific branch, revision, or tag
+          # Specify branch, tag or commit hash to use
+          rev: main
           sparse_paths:
             -
           link:
           scripts:
-            - ./gitman_init.sh # Optional: include project ID: e.g. 'mydevenv'
+            - ./gitman_init.sh
       ```
       - The `gitman_init.sh` script will prompt for the project identifier
          which would be something like "devenv" or "my-test-site". You can
