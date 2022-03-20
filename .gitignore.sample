@@ -1,0 +1,5 @@
+database/*
+secrets/*
+repo_sources/*
+mutagen.yml.lock
+/devenv

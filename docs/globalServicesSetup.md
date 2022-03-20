@@ -1,3 +1,6 @@
+- [Docker Desktop](#docker-desktop)
+  - [Installation](#installation)
+  - [Alternatives](#alternatives)
 - [Global Services Setup](#global-services-setup)
 - [Service Descriptions](#service-descriptions)
   - [CoreDNS](#coredns)
@@ -9,14 +12,51 @@
   - [Seed Step CA](#seed-step-ca)
   - [Start the Core Services](#start-the-core-services)
 - [DNSMasq (Optional)](#dnsmasq-optional)
-  - [Installation](#installation)
-- [Mutagen](#mutagen)
+  - [Windows Support](#windows-support)
+  - [MacOS Installation](#macos-installation)
+- [Mutagen (MacOS)](#mutagen-macos)
 - [Mutagen-Compose](#mutagen-compose)
-  - [Installation](#installation-1)
+  - [Installation (MacOS)](#installation-macos)
+
+## Docker Desktop
+
+Grab the latest version from [docker.com](http://docker.com) and install it.
+You can configure the general resource limits in Windows and MacOS for the
+shadow VM that Docker needs to run. If you still plan to use your device for
+other work you shouldn't allocate more than 50% of your memory and CPU to the
+shadow VM.
+
+### Installation
+
+1. Run the downloaded installer
+1. Start Docker Desktop if it isn't already running
+1. Configure Docker settings
+   1. Click the Cog icon in the top right
+      1. Ensure `Use gRPC FUSE for file sharing` is enabled
+      1. Ensure `Use Docker Compose V2` is enabled
+   1. Under `Resources` tab:
+      1. Under `Advanced`:
+         1. Set maximum number of CPUs allowed to at most 1/2 of your Mac's CPU
+         core count
+            - Example: 16-core Intel should have no more than 8 set as the max
+         1. Set maximum memory to at most 1/2 of your Mac's memory
+            - Example: 16GB Mac should have no more than 8 set as the max
+      1. Under `File Sharing`:
+         1. Make sure `/Users` or the folder container all your projects is
+         shared
+      1. Under `Network` (Optional):
+         1. Adjust the Docker subnet
+   1. Click `Apply & Restart` to apply your changes
+
+### Alternatives
+
+Docker Desktop is not free for everyone, so it may not be a fit for you or your
+organization. You do not need to use Docker Desktop for this. This is intended
+for use with Docker, so any Docker service will work (e.g. Lima or Colima).
 
 ## Global Services Setup
 
-The global project services are a set of container that every project will
+The global project services are a set of containers that every project will
 share. These provide general services that don't need to be customized on a
 per-project basis and simplify the DevEnv. These services are meant to run
 separately from any individual project and to be kept running at all times.
@@ -82,7 +122,8 @@ All the services listed above will be contained in their own
        # Check to see if the zone files need to be reloaded every 20 seconds
        reload 20s
      }
-     # Will forward requests that aren't handled by one of the configured zones    to Cloudflare DNS
+     # Will forward requests that aren't handled by one of the configured
+     # zones to Cloudflare DNS
      forward . 1.1.1.1:53 1.0.0.1:53
      errors
      log
@@ -99,9 +140,11 @@ core service containers:
    networks:
      # Use the network we already created
      traefik-backbone:
+       # This specifies that the network was created outside this compose file
        external: true
     
    services:
+     # Traefik reverse-proxy container
      traefik:
        image: traefik:latest
        container_name: traefik
@@ -126,11 +169,16 @@ core service containers:
          # This exposes the docker socket so Traefik can read running container
          # configurations for automatic registration
          - /var/run/docker.sock:/var/run/docker.sock
+         # Share the generated certs and private key files from StepCA
          - ${PWD}/step-ca/certs/:/etc/step-ca/certs
          - ${PWD}/step-ca/secrets:/etc/step-ca/private
+         # Add the custom ACME script for Traefik to execute
          - ${PWD}/traefik/coredns-acme-dns01-linux-amd64/:/usr/local/bin/coredns-acme-dns01-linux-amd64
+         # Share the CoreDNS zones so Traefik can dynamically create/update them
          - ${PWD}/coredns/zones/:/coredns/zones.d/
+         # Share the custom Traefik configuration
          - ${PWD}/traefik/traefik.yml:/etc/traefik/traefik.yml
+         # Share the custom acme.json where issued certs are stored
          - ${PWD}/traefik/acme.json:/acme/acme.json
        environment:
          LEGO_CA_CERTIFICATES: /etc/step-ca/certs/root_ca.crt
@@ -150,9 +198,11 @@ core service containers:
        container_name: coredns
        networks:
          traefik-backbone:
+           # Specify a specific IP address for this container, 53 for DNS
            ipv4_address: 172.19.0.53
          default: {}
        volumes:
+         # Share local configuration files
          - ${PWD}/coredns/Corefile:/Corefile
          - ${PWD}/coredns/zones.d/:/zones.d/
     
@@ -185,6 +235,7 @@ core service containers:
        image: smallstep/step-ca
        container_name: step-ca
        volumes:
+         # Share StepCA configuration files
          - ${PWD}/step-ca/:/home/step/
        networks:
          traefik-backbone:
@@ -196,13 +247,14 @@ core service containers:
          DOCKER_STEPCA_INIT_NAME: Classy Llama DevEnv
          DOCKER_STEPCA_INIT_DNS_NAMES: localhost,step-ca
          DOCKER_STEPCA_INIT_PROVISIONER_NAME: devenv@devenv.lan
+       # Override initial command to use specific DNS resolver
        command: /bin/sh -c "exec /usr/local/bin/step-ca --password-file /home/step/secrets/password --resolver '172.19.0.53:53' /home/step/config/ca.json"
    ```
 
 ### Seed Step CA
 
 1. Move into the global services directory created in step 2 of "Generic
-   Service Setup"<br>
+   Service Setup" if you are not already there<br>
    ```
    cd ~/global-services
    ```
@@ -222,8 +274,9 @@ core service containers:
    ```
    docker compose down step-ca
    ```
-1. Import the root CA certificate into the Mac keychain and any browsers
-   that don't read their CA certificates from the Mac keychain
+1. Import the root CA certificate into the Mac keychain, or Windows trust, and
+   any browsers that don't read their CA certificates from the Mac keychain, or
+   Windows trust.
 
 ### Start the Core Services
 
@@ -251,26 +304,30 @@ will allow you to route any domain to a specific IP. It will only resolve what
 it has authority to resolve and will pass along all other requests to a real
 DNS server.
 
-### Installation
+### Windows Support
+
+Unfortunately Windows is not supported by DNSMasq. You can use any other DNS
+proxy system (e.g. firewall) or potentially use the CoreDNS container as the DNS
+provider for your system. This is outside the scope of this document.
+
+### MacOS Installation
 
 1. Install the DNSMasq package
     - `brew install dnsmasq `
-    - **Windows:** ?? Isn't supported, but any other DNS Proxy where you can
-    define specific entries get routed to a particular IP would work
-      - It may be possible to use the CoreDNS Docker container for this;
-      however, that is outside the scope of this document.
-1. Add record to forward all requests for `.lan` addresses to DNSMasq
+2. Add record to forward all requests for `.lan` addresses to DNSMasq
     - `echo "address=/.lan/127.0.0.1" | sudo tee -a /usr/local/etc/dnsmasq.conf`
-1. Add custom resolver for `.lan`
+3. Add custom resolver for `.lan`
     - Create the resolver directory (if it doesn't already exist):
     `sudo mkdir /etc/resolver`
     - Add DNSMasq as the resolver for `.lan`:
     `echo nameserver 127.0.0.1" | sudo tee /etc/resolver/lan`
-1. Restart MacOS Resolver
-   `sudo killall -HUP mDNSResponder;
+4. Restart MacOS Resolver
+   ```
+   sudo killall -HUP mDNSResponder;
    sudo killall mDNSResponderHelper;
-   sudo dscacheutil -flushcache`
-1. Validate the resolver is now able to use DNSMasq:
+   sudo dscacheutil -flushcache
+   ```
+5. Validate the resolver is now able to use DNSMasq:
    `scutil --dns | rep -A3 -B1 lan`
     - You should expect to see something like the following:
       ```
@@ -279,8 +336,9 @@ DNS server.
          nameserver[0] : 127.0.0.1
          flags    : Request A records, Request AAAA records
          reach    : 0x00030002 (Reachable,Local Address,Directly Reachable Address)
+      ```
 
-## Mutagen
+## Mutagen (MacOS)
 
 Install mutagen via Homebrew like any other package: `brew install mutagen`
 
@@ -293,6 +351,6 @@ Mutagen-Compose is a docker-compose replacement that will start a separate
 container process to keep files inside a docker volume and on the host in sync.
 There are some caveats to this which require some initial workflow adjustments.
 
-### Installation
+### Installation (MacOS)
 
 Install mutagen-compose via Homebrew: `brew install mutagen-compose`

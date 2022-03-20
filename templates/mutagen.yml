@@ -1,0 +1,30 @@
+# Before we start Mutagen, start the docker containers
+beforeCreate:
+  - docker compose up -d
+
+# Stop docker containers when terminating Mutagen
+afterTerminate:
+  - docker compose down
+
+sync:
+  magento:
+    alpha: "../../"
+    beta: "docker://{{ID}}_php/app/"
+    mode: "two-way-resolved"
+    symlink:
+      mode: "ignore"
+    ignore:
+      vcs: true
+      paths:
+        - ".idea/*"
+        - "node_modules/"
+        - "phpserver/"
+        - "pub/media/"
+        - "pub/static/"
+        - "tools/devenv/"
+        - "tools/devenv2/"
+        - "update/"
+        - "var/"
+    permissions:
+      defaultFileMode: 0664
+      defaultDirectoryMode: 0775
