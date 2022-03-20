@@ -1,0 +1,16 @@
+location: repo_sources
+sources:
+  - repo: git@github.com:bap14/cl-devenv-docker.git
+    name: devenv
+    # Specify branch, tag, or specific commit hash
+    rev: main
+    type: git
+    sparse_paths:
+      -
+    links:
+      -
+    scripts:
+      - ./gitman_init.sh
+groups:
+  -
+default_group: ''
