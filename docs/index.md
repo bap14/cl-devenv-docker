@@ -53,22 +53,24 @@ those services that are shared across all projects.
 ## Per-Project Configuration
 
 1. Install via GitMan
-   1. Create a `gitman.yml` file:
-      ```yaml
+   1. Create a [`gitman.yml`](files/gitman.sample.yml) file:
+      ```
       location: repo_sources
       sources:
-        - name: devenv
-          type: git
-          repo: git@github.com:bap14/cl-devenv-docker.git
-          # Specify branch, tag or commit hash to use
+        - repo: git@github.com:bap14/cl-devenv-docker.git
+          name: devenv
           rev: main
+          type: git
           sparse_paths:
             -
-          link:
+          links:
+            -
           scripts:
             - ./gitman_init.sh
+      groups:
+        -
+      default_group: ''
       ```
-      
       - The `gitman_init.sh` script will prompt for the project identifier
          which would be something like "devenv" or "my-test-site". You can
          suppress this prompt by passing the project identifier as an argument 
@@ -77,7 +79,6 @@ those services that are shared across all projects.
         the identifier. It will automatically sanitize it so it only includes
         letters, numbers, underscores and dashes. The following commands are
         synonymous:
-        
         ```bash
         # Pass a single argument
         ./gitman_init.sh "my-dev-site"
