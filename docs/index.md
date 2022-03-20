@@ -68,6 +68,7 @@ those services that are shared across all projects.
           scripts:
             - ./gitman_init.sh
       ```
+      
       - The `gitman_init.sh` script will prompt for the project identifier
          which would be something like "devenv" or "my-test-site". You can
          suppress this prompt by passing the project identifier as an argument 
@@ -76,6 +77,7 @@ those services that are shared across all projects.
         the identifier. It will automatically sanitize it so it only includes
         letters, numbers, underscores and dashes. The following commands are
         synonymous:
+        
         ```bash
         # Pass a single argument
         ./gitman_init.sh "my-dev-site"
