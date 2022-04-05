@@ -10,7 +10,7 @@ sources:
     links:
       -
     scripts:
-      - ./gitman_init.sh
+      - ./gitman_init.sh "site_id"
 groups:
   -
 default_group: ''
