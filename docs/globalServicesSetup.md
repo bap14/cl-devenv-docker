@@ -110,7 +110,7 @@ All the services listed above will be contained in their own
    ```
 1. Create a directory for each service to hold configs and cache files:
    ```
-   mkdir -p traefik step-ca coredns/zones.d
+   mkdir -p traefik/traefik.d step-ca coredns/zones.d
    ```
 1. Create CoreDNS configuration file<br>
    **coredns/Corefile**
@@ -133,7 +133,80 @@ All the services listed above will be contained in their own
    ```
 1. Download the [coredns-acme-dns01-linux-amd64](files/coredns-acme-dns01-linux-amd64) helper tool to
    automatically create and update zone files
-1. Create a docker-compose.yml file detailing all the configurations for the
+1. Create `traefik/traefik.yml` configuration file.
+   ```
+   global:
+   checkNewVersion: true
+   sendAnonymousUsage: false
+   
+   api:
+     dashboard: true
+     debug: false
+   
+   pilot:
+     dashboard: false
+     
+   docker:
+     domain: lan
+   
+   providers:
+     docker:
+       defaultRule: "Host(`{{ normalize .Name }}.lan2`)"
+       endpoint: "unix:///var/run/docker.sock"
+       exposedByDefault: false
+       network: traefik-backbone
+     file:
+       directory: "/traefik/traefik.d"
+       watch: true
+    
+   entrypoints:
+     http:
+       address: ":80"
+       forwardedHeaders:
+         insecure: true
+       # Force all HTTP requests to HTTPS
+       http:
+         redirections:
+           entryPoint:
+             scheme: https
+             to: https
+     https:
+       address: ":443"
+       forwardedHeaders:
+         insecure: true
+       http:
+         middlewares:
+           compress: true
+         tls:
+           certResolver: stepca
+     mail:
+       address: ":25"
+     mails:
+       address: ":587"
+   
+   tls:
+     minVersion: VersionTLS12
+   
+   serversTransport:
+     insecureSkipVerify: true
+   
+   certificatesResolvers:
+     stepCA:
+       acme:
+         # Use the internal StepCA server
+         caServer: "https://step-ca:9000/acme/acme/directory"
+         # Certificates valid for 90 days (2160 hours)
+         certificatesDuration: 2160
+         email: "acme@devenv.llama"
+         storage: /traefik/acme.json
+         keyType: "EC384"
+         dnsChallenge:
+           provider: exec
+           delayBeforeCheck: 25
+           resolvers:
+             - "172.19.0.53:53"
+   ```
+3. Create a docker-compose.yml file detailing all the configurations for the
 core service containers:
    **docker-compose.yml**
    ```yml
@@ -178,8 +251,9 @@ core service containers:
          - ${PWD}/coredns/zones/:/coredns/zones.d/
          # Share the custom Traefik configuration
          - ${PWD}/traefik/traefik.yml:/etc/traefik/traefik.yml
+         - ${PWD}/traefik/traefik.d:/traefik/traefik.d
          # Share the custom acme.json where issued certs are stored
-         - ${PWD}/traefik/acme.json:/acme/acme.json
+         - ${PWD}/traefik/acme.json:/traefik/acme.json
        environment:
          LEGO_CA_CERTIFICATES: /etc/step-ca/certs/root_ca.crt
          EXEC_PATH: /usr/local/bin/coredns-acme-dns01-linux-amd64
