@@ -197,7 +197,7 @@ All the services listed above will be contained in their own
          caServer: "https://step-ca:9000/acme/acme/directory"
          # Certificates valid for 90 days (2160 hours)
          certificatesDuration: 2160
-         email: "acme@devenv.llama"
+         email: "acme@devenv.lan"
          storage: /traefik/acme.json
          keyType: "EC384"
          dnsChallenge:
