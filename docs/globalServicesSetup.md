@@ -196,6 +196,7 @@ core service containers:
      coredns:
        image: coredns/coredns:1.8.7
        container_name: coredns
+       restart: unless-stopped
        networks:
          traefik-backbone:
            # Specify a specific IP address for this container, 53 for DNS
@@ -262,21 +263,30 @@ core service containers:
    ```
    docker compose up step-ca
    ```
-1. Wait and monitor the `step-ca` folder for the creation of CA certificates
-1. Proceed to the next step once the following files are created
+1. Observe the ouptut in the terminal. You should see a notice that StepCA is ready to go, like:
+   ```
+   ✔ Root certificate: /home/step/certs/root_ca.crt
+   ✔ Root private key: /home/step/secrets/root_ca_key
+   ✔ Root fingerprint: 7e0a73f175342a088b8ff630cb20e847e2a8d26f6033359300af2aef73530d27
+   ✔ Intermediate certificate: /home/step/certs/intermediate_ca.crt
+   ✔ Intermediate private key: /home/step/secrets/intermediate_ca_key
+   ✔ Database folder: /home/step/db
+   ✔ Default configuration: /home/step/config/defaults.json
+   ✔ Certificate Authority configuration: /home/step/config/ca.json
+
+   Your PKI is ready to go. To generate certificates for individual services see 'step help ca'.
+   ```
+1. Check that you can see the following files on your host system. If not
    - step-ca/certs/root_ca.crt
    - step-ca/certs/intermedia_ca.crt
    - step-ca/config/ca.json
    - step-ca/config/defaults.json
    - step-ca/secrets/root_ca_key
    - step-ca/secrets/intermedia_ca_key
-1. Stop the StepCA container
-   ```
-   docker compose down step-ca
-   ```
-1. Import the root CA certificate into the Mac keychain, or Windows trust, and
-   any browsers that don't read their CA certificates from the Mac keychain, or
-   Windows trust.
+1. Stop the StepCA container by pressing `ctrl` and `c` at the same time
+1. Import the root CA certificate (located at `step-ca/certs/root_ca.crt`) into the Mac keychain,
+   or Windows trust, and any browsers that don't read their CA certificates from the Mac keychain,
+   or Windows trust.
 
 ### Start the Core Services
 
