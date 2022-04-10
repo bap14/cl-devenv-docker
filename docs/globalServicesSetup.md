@@ -136,8 +136,8 @@ All the services listed above will be contained in their own
 1. Create `traefik/traefik.yml` configuration file.
    ```
    global:
-   checkNewVersion: true
-   sendAnonymousUsage: false
+     checkNewVersion: true
+     sendAnonymousUsage: false
    
    api:
      dashboard: true
