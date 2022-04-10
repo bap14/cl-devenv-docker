@@ -343,9 +343,9 @@ core service containers:
    ```
 1. Start just the StepCA container
    ```
-   docker compose up step-ca
+   docker compose up -d step-ca
    ```
-1. Observe the ouptut in the terminal. You should see a notice that StepCA is ready to go, like:
+1. Looking at the output for this docker container you should see the following after proper initialization:
    ```
    ✔ Root certificate: /home/step/certs/root_ca.crt
    ✔ Root private key: /home/step/secrets/root_ca_key
@@ -358,14 +358,25 @@ core service containers:
 
    Your PKI is ready to go. To generate certificates for individual services see 'step help ca'.
    ```
-1. Check that you can see the following files on your host system. If not
+1. Check that you can see the following files on your host system. If not stop the container and empty the `step-ca` folder and retry
    - step-ca/certs/root_ca.crt
    - step-ca/certs/intermedia_ca.crt
    - step-ca/config/ca.json
    - step-ca/config/defaults.json
    - step-ca/secrets/root_ca_key
    - step-ca/secrets/intermedia_ca_key
-1. Stop the StepCA container by pressing `ctrl` and `c` at the same time
+1. Add the ACME provisioner to StepCA
+   ```
+   docker compose exec step-ca step ca provisioner add acme --type ACME
+   ```
+   - You should see the following if successful:
+     ```
+     Success! Your `step-ca` config has been updated. [...]
+     ```
+1. Stop the StepCA container
+   ```
+   docker compose down step-ca
+   ```
 1. Import the root CA certificate (located at `step-ca/certs/root_ca.crt`) into the Mac keychain,
    or Windows trust, and any browsers that don't read their CA certificates from the Mac keychain,
    or Windows trust.
