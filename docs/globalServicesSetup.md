@@ -330,7 +330,7 @@ provider for your system. This is outside the scope of this document.
     - Create the resolver directory (if it doesn't already exist):
     `sudo mkdir /etc/resolver`
     - Add DNSMasq as the resolver for `.lan`:
-    `echo nameserver 127.0.0.1" | sudo tee /etc/resolver/lan`
+    `echo "nameserver 127.0.0.1" | sudo tee /etc/resolver/lan`
 4. Restart MacOS Resolver
    ```
    sudo killall -HUP mDNSResponder;
@@ -338,7 +338,7 @@ provider for your system. This is outside the scope of this document.
    sudo dscacheutil -flushcache
    ```
 5. Validate the resolver is now able to use DNSMasq:
-   `scutil --dns | rep -A3 -B1 lan`
+   `scutil --dns | grep -A3 -B1 lan`
     - You should expect to see something like the following:
       ```
       resolver #8
