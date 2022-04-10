@@ -132,7 +132,11 @@ All the services listed above will be contained in their own
    }
    ```
 1. Download the [coredns-acme-dns01-linux-amd64](files/coredns-acme-dns01-linux-amd64) helper tool to
-   automatically create and update zone files
+   automatically create and update zone files, place it in the `traefik` directory.
+1. Update permissions to allow execution of the downloaded file
+   ```
+   chmod +x traefik/coredns-acme-dns01-linux-amd64
+   ```
 1. Create `traefik/traefik.yml` configuration file.
    ```
    global:
