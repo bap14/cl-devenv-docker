@@ -131,22 +131,6 @@ All the services listed above will be contained in their own
      reload
    }
    ```
-1. Create `coredns/zones.d/db.lan` DNS Zone file
-   ```
-   $TTL 60
-   $ORIGIN llama.
-   @        3600 IN SOA a.ns.llama. b.ns.llama. (
-                        2022041002 ; serial
-                        86400         ; refresh
-                        3600          ; retry
-                        604800        ; expire
-                        86400         ; expire
-                        )
-            3600 IN NS   a.ns.llama.
-            3600 IN NS   b.ns.llama.
-   a.ns          IN A    172.19.0.53
-   b.ns          IN A    172.19.0.53
-   ```
 1. Download the [coredns-acme-dns01-linux-amd64](files/coredns-acme-dns01-linux-amd64) helper tool to
    automatically create and update zone files, place it in the `traefik` directory.
 1. Update permissions to allow execution of the downloaded file
