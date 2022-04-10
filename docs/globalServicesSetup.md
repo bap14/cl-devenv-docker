@@ -206,7 +206,11 @@ All the services listed above will be contained in their own
            resolvers:
              - "172.19.0.53:53"
    ```
-3. Create a docker-compose.yml file detailing all the configurations for the
+1. Create `traefik/acme.json` with empty JSON object
+   ```
+   {}
+   ```
+1. Create a docker-compose.yml file detailing all the configurations for the
 core service containers:
    **docker-compose.yml**
    ```yml
