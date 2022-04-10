@@ -210,6 +210,10 @@ All the services listed above will be contained in their own
    ```
    {}
    ```
+1. Adjust permissions for `traefik/acme.json`
+   ```
+   chmod 600 traefik/acme.json
+   ```
 1. Create a docker-compose.yml file detailing all the configurations for the
 core service containers:
    **docker-compose.yml**
