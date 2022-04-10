@@ -178,7 +178,7 @@ All the services listed above will be contained in their own
          middlewares:
            compress: true
          tls:
-           certResolver: stepca
+           certResolver: stepCA
      mail:
        address: ":25"
      mails:
