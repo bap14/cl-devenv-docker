@@ -155,7 +155,7 @@ All the services listed above will be contained in their own
    
    providers:
      docker:
-       defaultRule: "Host(`{{ "{{" }} normalize .Name {{ "}}" }}.lan`)"
+       defaultRule: "Host(`{{ normalize .Name }}.lan`)"
        endpoint: "unix:///var/run/docker.sock"
        exposedByDefault: false
        network: traefik-backbone
