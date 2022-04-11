@@ -260,7 +260,7 @@ core service containers:
          # Add the custom ACME script for Traefik to execute
          - ${PWD}/traefik/coredns-acme-dns01-linux-amd64/:/usr/local/bin/coredns-acme-dns01-linux-amd64
          # Share the CoreDNS zones so Traefik can dynamically create/update them
-         - ${PWD}/coredns/zones/:/coredns/zones.d/
+         - ${PWD}/coredns/zones.d/:/coredns/zones.d/
          # Share the custom Traefik configuration
          - ${PWD}/traefik/traefik.yml:/etc/traefik/traefik.yml
          - ${PWD}/traefik/traefik.d:/traefik/traefik.d
