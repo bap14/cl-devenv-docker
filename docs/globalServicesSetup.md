@@ -276,7 +276,7 @@ core service containers:
          traefik.http.routers.traefik-dashboard.rule: "Host(`traefik.lan`)"
          traefik.http.routers.traefik-dashboard.tls: true
          traefik.http.routers.traefik-dashboard.tls.certresolver: stepCA
-         traefik.http.routers.traefik-dashboard.tls.domains[0].main: "traefik.   lan"
+         traefik.http.routers.traefik-dashboard.tls.domains[0].main: "traefik.lan"
          traefik.http.routers.traefik-dashboard.service: "api@internal"
       
      coredns:
