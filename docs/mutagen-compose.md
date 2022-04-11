@@ -32,6 +32,13 @@ the volume):
 
 1. Start the PHP container (or any container that uses the volume)
 `docker compose up -d php`
-1. Copy the files from the host to volume: `docker compose copy -R . php:/app`
+1. Copy the files from the host to volume: `docker compose cp ../../. php:/app/`
+   The path `../../.` is used because this command must be run from the directory
+   where the docker-compose.yml file is located, and to only copy the contents of
+   the directory and not the directory itself.
+1. Optional: Clean up unnecessary files that were copied over
+   ```
+   docker compose exec php /bin/sh -c "rm -rf /app/tools /app/.idea"
+   ```
 1. Wait for the process to finish
 1. Stop the container: `docker compose down`
