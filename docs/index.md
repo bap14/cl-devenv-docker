@@ -43,6 +43,7 @@ environments
 - Pre-defined Traefik network (in examples named: traefik-backbone)
   - This provides the backbone of the communication network between Traefik and
   the containers it routes traffic to
+- [Gitman](https://gitman.readthedocs.io/en/latest/) git dependency tool
 
 ## Prerequisites Installation / Configuration
 
@@ -69,6 +70,7 @@ those services that are shared across all projects.
         # Pass each word as a separate argument
         ./gitman_init.sh my dev site
         ```
+   1. Run `gitman install`
 1. Update the `dev-db-sync` script for your environment
    1. **For Magento Cloud**
       1. Update `dev-db-sync.cloud.sh` and specify the Magento
