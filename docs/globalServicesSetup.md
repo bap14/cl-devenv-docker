@@ -422,7 +422,7 @@ provider for your system. This is outside the scope of this document.
 1. Install the DNSMasq package
     - `brew install dnsmasq `
 2. Add record to forward all requests for `.lan` addresses to DNSMasq
-    - `echo "address=/.lan/127.0.0.1" | sudo tee -a /usr/local/etc/dnsmasq.conf`
+    - `echo "address=/.lan/127.0.0.1" | sudo tee -a /opt/homebrew/etc/dnsmasq.conf`
 3. Add custom resolver for `.lan`
     - Create the resolver directory (if it doesn't already exist):
     `sudo mkdir /etc/resolver`
