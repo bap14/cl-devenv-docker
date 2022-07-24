@@ -32,9 +32,8 @@ shadow VM.
 1. Start Docker Desktop if it isn't already running
 1. Configure Docker settings
    1. Click the Cog icon in the top right
-      1. Ensure `Use gRPC FUSE for file sharing` is enabled
       1. Ensure `Use Docker Compose V2` is enabled
-   1. Under `Resources` tab:
+   1. (MacOS) Under `Resources` tab:
       1. Under `Advanced`:
          1. Set maximum number of CPUs allowed to at most 1/2 of your Mac's CPU
          core count
@@ -46,6 +45,9 @@ shadow VM.
          shared
       1. Under `Network` (Optional):
          1. Adjust the Docker subnet
+   1. (MacOS) Under `Experimental Features` tab:
+      1. Ensure `Use the new Virtualization framework` is enabled
+      1. Ensure `Enable VirtioFS accelerated directory sharing` is enabled
    1. Click `Apply & Restart` to apply your changes
 
 ### Alternatives
