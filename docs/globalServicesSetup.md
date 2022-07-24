@@ -447,7 +447,7 @@ provider for your system. This is outside the scope of this document.
 
 ## Mutagen (MacOS)
 
-Install mutagen via Homebrew like any other package: `brew install mutagen`
+Install mutagen via Homebrew like any other package: `brew install mutagen-io/mutagen/mutagen`
 
 Once installed you can use the sample file as a guide on how to configure this
 project.
@@ -460,4 +460,4 @@ There are some caveats to this which require some initial workflow adjustments.
 
 ### Installation (MacOS)
 
-Install mutagen-compose via Homebrew: `brew install mutagen-compose`
+Install mutagen-compose via Homebrew: `brew install mutagen-io/mutagen/mutagen-compose`
