@@ -386,6 +386,19 @@ core service containers:
 1. Import the root CA certificate (located at `step-ca/certs/root_ca.crt`) into the Mac keychain,
    or Windows trust, and any browsers that don't read their CA certificates from the Mac keychain,
    or Windows trust.
+1. Adjust default SSL configuration
+   1. Edit `step-ca/config/ca.json`
+   1. Under `authority` key add the following:
+      ```
+      "claims": {
+			  "minTLSCertDuration": "24h",
+			  "maxTLSCertDuration": "9120h",
+        "defaultTLSCertDuration": "2160h",
+			  "disableRenewal": false,
+			  "allowRenewalAfterExpiry": false
+		  },
+      ```
+   1. Save the file
 
 ### Start the Core Services
 
